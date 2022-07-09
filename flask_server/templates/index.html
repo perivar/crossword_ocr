@@ -1,0 +1,56 @@
+{% extends "_base.html" %} {% block content %}
+
+<h1>OCR (Tesseract Demo)</h1>
+<br />
+
+<form
+  role="form"
+  method="POST"
+  id="post-form"
+  onsubmit="return false"
+  enctype="multipart/form-data"
+>
+  <div id="pc_fileupload" class="form-group">
+    <input type="file" name="file" id="file" onchange="loadFile(event)" />
+    <br />
+    <br />
+  </div>
+  <button
+    type="submit"
+    class="btn btn-lg btn-block btn-success boom"
+    id="submit"
+  >
+    Text extraction
+  </button>
+</form>
+
+<div id="mob_camera">
+  <div style="float: left" id="mob-container">
+    <video
+      id="camera--view"
+      height="400"
+      width="400"
+      autoplay
+      playsinline
+    ></video>
+  </div>
+  <canvas
+    style="float: left; width: 200px; height: 200px"
+    id="camera--capture"
+  ></canvas>
+</div>
+
+<div id="results">
+  <h3>Image</h3>
+  <img src="" style="max-width: 400px" id="image" /><br />
+  <h3>Results</h3>
+  <div id="results-data"></div>
+</div>
+
+<br /><br />
+
+<div id="retry"><a href="">initial screen</a></div>
+
+<script></script>
+
+{% endblock %}
