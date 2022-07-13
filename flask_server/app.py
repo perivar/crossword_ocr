@@ -5,7 +5,7 @@ import traceback
 import cv2
 import pytesseract
 
-from ocr import process_image, process_image2, process_image3
+from ocr import process_image, process_image2, process_image3, process_image4
 
 app = Flask(__name__)
 _VERSION = 1  # API version
@@ -43,7 +43,7 @@ def ocr():
             image = Image.open(io.BytesIO(image))
             print("RECV:", image.format, image.size, image.mode)
 
-            output = process_image3(image)
+            output = process_image4(image)
             return jsonify({"output": output})
         else:
             return jsonify({"error": "only .jpg files, please"})
