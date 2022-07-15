@@ -39,12 +39,12 @@ def maximizeContrast(imgGrayscale):
     return imgGrayscalePlusTopHatMinusBlackHat
 
 #### 2 - FINDING THE BIGGEST CONTOUR WITH OPTIONALLY 4 SIDES
-def biggestContour(contours, is4Sides = True):
+def biggestContour(contours, is4Sides = True, minArea = 50):
     biggest = np.array([])
     max_area = 0
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        if area > 50:
+        if area > minArea:
             if is4Sides:
                 peri = cv2.arcLength(cnt, True)
                 approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)

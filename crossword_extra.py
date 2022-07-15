@@ -52,3 +52,51 @@ def get_ROI(image, horizontal, vertical, left_line_index, right_line_index, top_
     cropped_image = get_cropped_image(image, x1, y1, w, h)
     
     return cropped_image, (x1, y1, w, h)
+
+def extractVerticalLines(input):
+    # https://stackoverflow.com/questions/10196198/how-to-remove-convexity-defects-in-a-sudoku-square
+
+    # Finding Vertical lines
+    kernel1X = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 10))
+
+    dx = cv2.Sobel(input, cv2.CV_8U, dx=2, dy=0) # originally CV_16S
+    dx = cv2.convertScaleAbs(dx)
+    cv2.normalize(dx, dx, 0, 255, cv2.NORM_MINMAX)
+    ret, close = cv2.threshold(dx, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    close = cv2.morphologyEx(close, cv2.MORPH_DILATE, kernel1X, iterations = 1)
+
+    contours, hierarchy = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        if h/w > 20: # originally 5
+            cv2.drawContours(close, [cnt], 0, 255, -1)  # full color (255)
+        else:
+            cv2.drawContours(close, [cnt], 0, 0, -1)    # no color (0)
+
+    close = cv2.morphologyEx(close, cv2.MORPH_CLOSE, None, iterations = 2)
+    closeX = close.copy()
+    return closeX
+
+def extractHorizontalLines(input):
+    # https://stackoverflow.com/questions/10196198/how-to-remove-convexity-defects-in-a-sudoku-square
+    
+    # Finding Horizontal Lines
+    kernel1Y = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 2))
+    dy = cv2.Sobel(input, cv2.CV_8U, dx=0, dy=2) # originally CV_16S
+    dy = cv2.convertScaleAbs(dy)
+    cv2.normalize(dy, dy, 0, 255, cv2.NORM_MINMAX)
+    ret, close = cv2.threshold(dy, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    close = cv2.morphologyEx(close, cv2.MORPH_DILATE, kernel1Y)
+
+    contours, hierarchy = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for cnt in contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        if w/h > 20: # originally 5
+            cv2.drawContours(close, [cnt], 0, 255, -1)  # full color (255)
+        else:
+            cv2.drawContours(close, [cnt], 0, 0, -1)   # no color (0)
+
+    close = cv2.morphologyEx(close, cv2.MORPH_DILATE, None, iterations = 2)
+    closeY = close.copy()
+    return closeY
