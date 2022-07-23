@@ -8,16 +8,14 @@ def removeOuterBorder(image, thresh):
     # Remove vertical lines
     vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,10))
     remove_vertical = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
-    cnts = cv2.findContours(remove_vertical, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    (cnts, _) = cv2.findContours(remove_vertical, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         cv2.drawContours(removed, [c], -1, (255,255,255), 5)
 
     # Remove horizontal lines
     horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10,1))
     remove_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
-    cnts = cv2.findContours(remove_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    (cnts, _) = cv2.findContours(remove_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         cv2.drawContours(removed, [c], -1, (255,255,255), 5)
 
@@ -65,8 +63,8 @@ def extractVerticalLines(input):
     ret, close = cv2.threshold(dx, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     close = cv2.morphologyEx(close, cv2.MORPH_DILATE, kernel1X, iterations = 1)
 
-    contours, hierarchy = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
+    (cnts, _) = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in cnts:
         x, y, w, h = cv2.boundingRect(cnt)
         if h/w > 20: # originally 5
             cv2.drawContours(close, [cnt], 0, 255, -1)  # full color (255)
@@ -88,9 +86,8 @@ def extractHorizontalLines(input):
     ret, close = cv2.threshold(dy, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     close = cv2.morphologyEx(close, cv2.MORPH_DILATE, kernel1Y)
 
-    contours, hierarchy = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    for cnt in contours:
+    (cnts, _) = cv2.findContours(close, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in cnts:
         x, y, w, h = cv2.boundingRect(cnt)
         if w/h > 20: # originally 5
             cv2.drawContours(close, [cnt], 0, 255, -1)  # full color (255)

@@ -37,19 +37,19 @@ def morphological_closing(gray):
 
 def extract_largest_contour(input, output):
     mask = np.zeros((input.shape), np.uint8)
-    contours, hierarchy = cv2.findContours(input, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    (cnts, _) = cv2.findContours(input, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # find the biggest contour
     # max_area = 0
     # best_cnt = None
-    # for cnt in contours:
+    # for cnt in cnts:
     #     area = cv2.contourArea(cnt)
     #     if area > max_area:
     #         max_area = area
     #         best_cnt = cnt
 
     # find the biggest contour, cannot use the 4 side version, since the grid can be skewed
-    best_cnt, _ = biggestContour(contours, False, 0) 
+    best_cnt, _ = biggestContour(cnts, False, 0) 
 
     cv2.drawContours(mask, [best_cnt], 0, 255, -1) # full color (255) inverted
     cv2.drawContours(mask, [best_cnt], 0, 0, 2)    # no color (0) thickness 2
@@ -88,8 +88,7 @@ def writeArrayToDisk(arr, out = 'array_out.txt'):
 
 
 def removeNoise(thresh, minArea = 5000):
-    cnts = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    (cnts, _) = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for c in cnts:
         area = cv2.contourArea(c)
         if area < minArea:
