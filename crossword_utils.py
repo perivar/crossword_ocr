@@ -2,6 +2,35 @@ import cv2
 import numpy as np
 from utils import *
 from sys import exit
+import json
+
+# https://github.com/hmallen/numpyencoder/blob/master/numpyencoder/numpyencoder.py
+# https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
+class NumpyEncoder(json.JSONEncoder):
+    """ Custom encoder for numpy data types """
+    def default(self, obj):
+        if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
+                            np.int16, np.int32, np.int64, np.uint8,
+                            np.uint16, np.uint32, np.uint64)):
+
+            return int(obj)
+
+        elif isinstance(obj, (np.float_, np.float16, np.float32, np.float64)):
+            return float(obj)
+        
+        elif isinstance(obj, (np.complex_, np.complex64, np.complex128)):
+            return {'real': obj.real, 'imag': obj.imag}
+        
+        elif isinstance(obj, (np.ndarray,)):
+            return obj.tolist()
+    
+        elif isinstance(obj, (np.bool_)):
+            return bool(obj)
+
+        elif isinstance(obj, (np.void)): 
+            return None
+
+        return json.JSONEncoder.default(self, obj)
 
 def show_wait_destroy(winname, img):
     cv2.imshow(winname, img)
@@ -86,6 +115,22 @@ def writeArrayToDisk(arr, out = 'array_out.txt'):
         else:
             print("Out of dimension!")
 
+def writeListToDisk(list, jsonFile = 'list_out.json'):
+    with open(jsonFile, 'w') as fp:
+        # for numpy_data in list:
+        #     json.dump(numpy_data, fp, indent=4, sort_keys=True,
+        #       separators=(', ', ': '), ensure_ascii=False,
+        #       cls=NumpyEncoder)
+        #     fp.write("\n")
+        json.dump(list, fp, indent=4, sort_keys=True,
+            separators=(', ', ': '), ensure_ascii=False,
+            cls=NumpyEncoder)
+        
+def readListFromDisk(jsonFile = 'list_out.json'):
+    # for reading also binary mode is important
+    with open(jsonFile, 'rb') as fp:
+        n_list = json.load(fp)
+        return n_list
 
 def removeNoise(thresh, minArea = 5000):
     (cnts, _) = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
