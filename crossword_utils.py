@@ -3,6 +3,8 @@ import numpy as np
 from utils import *
 from sys import exit
 import json
+from PIL import ImageFont, ImageDraw, Image
+import pytesseract
 
 # https://github.com/hmallen/numpyencoder/blob/master/numpyencoder/numpyencoder.py
 # https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
@@ -139,4 +141,42 @@ def removeNoise(thresh, minArea = 5000):
         if area < minArea:
             cv2.drawContours(thresh, [c], -1, (0,0,0), -1)
 
+def get_ocr_image(image, txt, bottomTxt=''):
+    output = image.copy()
 
+    h, w, _ = image.shape
+
+    # output = cv2.resize(image, (100, 100), cv2.INTER_AREA) 
+
+    # if using cv2.putText we only have a restricted character set
+    # therefore strip out non-ASCII text so we can draw the text on the image
+    # txt = "".join([c if ord(c) < 128 else "" for c in txt]).strip()
+
+    # use PIL to draw special characters like æøå
+    # convert from cv2-image to PIL-image 
+    img_pil = Image.fromarray(output)
+    draw = ImageDraw.Draw(img_pil)
+    # If you are working in a server, you can set the font by adding the actual file of the font, e.g. arial.ttf
+    font = ImageFont.truetype('/Library/Fonts/Arial.ttf', 24)
+
+    y0, dy = 25, 25
+    for i, line in enumerate(txt.split('\n')):
+        y = y0 + i*dy
+        # cv2.putText(output, line, (0, y ), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (255,255,0), 1)
+        draw.text((2, y), line, (255,255,0), font = font)
+    
+    # cv2.putText(output, bottomTxt, (0, h-20), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (0,255,255), 1)
+    draw.text((2, h-25), bottomTxt, (0,255,255), font = font)
+
+    # convert PIL-image back to cv2-image 
+    output = np.array(img_pil)
+
+    return output
+
+def ocr(roi):
+    # txt = pytesseract.image_to_string(roi, config="--psm 6", lang='nor')
+    txt = pytesseract.image_to_string(roi, 
+                                    config="-c tessedit"
+                                    "_char_whitelist=' 'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ-."
+                                    " --psm 6", lang='nor')
+    return txt
